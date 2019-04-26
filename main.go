@@ -3,33 +3,41 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/harshpreet93/go-dynamic-code-loading-blog/plugin_loader"
+	"gopkg.in/src-d/go-git.v4"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
-
 const plugin_source_folder_path  = "plugin_source"
 
-func main()  {
+func main() {
 
 	//not using https://github.com/spf13/cobra because this is just a POC
-	pluginrepo := flag.String("pluginrepo", "git@github.com:harshpreet93/go-dynamic-code-loading-blog.git",
+	pluginrepo := flag.String("pluginrepo", "https://github.com/harshpreet93/go-dynamic-code-loading-blog.git",
 		"The Repo that contains the plugins to load")
 	flag.Parse()
 
-	fmt.Println("pluginrepo is "+*pluginrepo)
+	fmt.Println("pluginrepo is " + *pluginrepo)
 
-	cloneRepo(*pluginrepo)
+	for range time.Tick(30 * time.Second) {
+		createWorkspace(*pluginrepo)
+	}
 
 }
 
-func cloneRepo(repo string) {
+func createWorkspace(repo string) {
 	//make sure
-	ensure_plugin_repo_folder_readiness()
+	ensurePluginRepoFolderReadiness(repo)
+	plugin_loader.ReloadPlugins(plugin_source_folder_path+"/sample_plugins")
+
 }
 
-func ensure_plugin_repo_folder_readiness()  {
-	// clean up /var/plugin_loader/plugin_source/
+func ensurePluginRepoFolderReadiness(repo string) {
+
+	const plugin_source_folder_path  = "plugin_source"
+
 	plugin_source_path := filepath.Join(".", plugin_source_folder_path)
 	os.RemoveAll(plugin_source_path)
 	err := os.MkdirAll(plugin_source_path, os.ModePerm)
@@ -37,5 +45,14 @@ func ensure_plugin_repo_folder_readiness()  {
 		log.Println("error creating plugin source folder", err)
 		return
 	}
-	
+
+	r, err := git.PlainClone(plugin_source_path, false, &git.CloneOptions{
+		URL: repo,
+	})
+	if err != nil {
+		log.Println("error cloning repo ", err)
+		return
+	}
+	fmt.Println("cloned ", r)
+
 }
