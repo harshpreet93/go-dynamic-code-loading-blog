@@ -30,7 +30,7 @@ func main() {
 func createWorkspace(repo string) {
 	//make sure
 	ensurePluginRepoFolderReadiness(repo)
-	plugin_loader.ReloadPlugins(plugin_source_folder_path+"/sample_plugins")
+	plugin_loader.ReloadPlugins(plugin_source_folder_path+"/plugins")
 
 }
 

@@ -1,4 +1,4 @@
-package pluginA
+package pluginB
 
 import "fmt"
 
