@@ -82,7 +82,7 @@ func findAllSourceFiles(pluginFolder string) []string {
 func buildPlugin(srcPath string) (string, error) {
 	cmd := exec.Command("go", "generate", srcPath)
 	wd, _ := os.Getwd()
-	fmt.Println("wd is ", wd)
+	log.Println("wd is ", wd)
 	var errOut bytes.Buffer
 	cmd.Stderr = &errOut
 	var stdOut bytes.Buffer

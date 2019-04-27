@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 	"time"
 )
-const plugin_source_folder_path  = "plugin_source"
+
+const plugin_source_folder_path = "plugin_source"
 
 func main() {
 
@@ -30,7 +31,7 @@ func main() {
 func createWorkspaceAndTest(repo string) {
 	//make sure
 	ensurePluginRepoFolderReadiness(repo)
-	loadedPlugins := plugin_loader.ReloadPlugins(plugin_source_folder_path+"/plugins")
+	loadedPlugins := plugin_loader.ReloadPlugins(plugin_source_folder_path + "/plugins")
 
 	// since we have the plugins......let's go further and actually use them to prove that they are....usable
 	for _, plugin := range loadedPlugins {
