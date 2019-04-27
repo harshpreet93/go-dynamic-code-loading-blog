@@ -36,9 +36,9 @@ func createWorkspace(repo string) {
 
 func ensurePluginRepoFolderReadiness(repo string) {
 
-	const plugin_source_folder_path  = "plugin_source"
+	const pluginSourceFolderPath = "plugin_source"
 
-	plugin_source_path := filepath.Join(".", plugin_source_folder_path)
+	plugin_source_path := filepath.Join(".", pluginSourceFolderPath)
 	os.RemoveAll(plugin_source_path)
 	err := os.MkdirAll(plugin_source_path, os.ModePerm)
 	if err != nil {

@@ -2,30 +2,63 @@ package plugin_loader
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/emirpasic/gods/sets/hashset"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"plugin"
 	"strings"
 )
 
-
 func ReloadPlugins(pluginFolder string) {
 	log.Println("loading plugins in plugin folder ", pluginFolder)
-	src_files := findAllSourceFiles(pluginFolder)
-	loadedPlugins := hashset.Set{}
-
-	for _, filepath := range src_files {
+	srcFiles := findAllSourceFiles(pluginFolder)
+	loadedPluginHashes := hashset.New()
+	var plugins []*plugin.Plugin
+	for _, filepath := range srcFiles {
 		log.Println("found ", filepath)
-		if pluginNeedsToBeLoaded(filepath, loadedPlugins) {
-			builtPath, _ := buildPlugin(filepath)
-			log.Println("plugin built ", builtPath)
-			loadPlugin(builtPath)
-		}
+		builtPath, err := buildPlugin(filepath)
+		if err == nil {
+			//in order to not load the same file over and over again let's store the md5 hash of the plugin we just loaded
+			hash, err := getMD5(filepath)
 
+			if err == nil && loadedPluginHashes.Contains(hash) {
+				log.Println("plugin at ", filepath, " with hash ", hash, " has already been loaded")
+				continue
+			}
+
+			pluginLoaded, err := loadPlugin(builtPath)
+			if err != nil {
+				log.Println("unable to load plugin ", filepath)
+				continue
+			}
+			plugins = append(plugins, pluginLoaded)
+			loadedPluginHashes.Add(hash)
+		}
 	}
+}
+
+func getMD5(filepath string) (string, error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	hashInBytes := h.Sum(nil)[:16]
+	md5String := hex.EncodeToString(hashInBytes)
+	log.Println("file ", filepath, " hash is ", md5String)
+	return md5String, nil
 }
 
 func findAllSourceFiles(pluginFolder string) []string {
@@ -41,7 +74,6 @@ func findAllSourceFiles(pluginFolder string) []string {
 }
 
 func buildPlugin(srcPath string) (string, error) {
-	//go build -buildmode=plugin
 	cmd := exec.Command("go", "generate", srcPath)
 	wd, _ := os.Getwd()
 	fmt.Println("wd is ", wd)
@@ -57,11 +89,16 @@ func buildPlugin(srcPath string) (string, error) {
 	if err != nil {
 		fmt.Println("build output ", errOut.String(), stdOut.String())
 	}
-	return strings.TrimSuffix(srcPath, ".go")+".so", err
+	return strings.TrimSuffix(srcPath, ".go") + ".so", err
 }
 
-func loadPlugin(builtPath string) error {
-	return nil
+func loadPlugin(builtPath string) (*plugin.Plugin, error) {
+	log.Println("loading ", builtPath)
+	p, err := plugin.Open(builtPath)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 func pluginNeedsToBeLoaded(filepath string, alreadyLoadedPlugins hashset.Set) bool {
