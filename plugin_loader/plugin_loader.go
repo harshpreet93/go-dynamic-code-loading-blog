@@ -21,6 +21,7 @@ func ReloadPlugins(pluginFolder string) {
 		log.Println("found ", filepath)
 		if pluginNeedsToBeLoaded(filepath, loadedPlugins) {
 			builtPath, _ := buildPlugin(filepath)
+			log.Println("plugin built ", builtPath)
 			loadPlugin(builtPath)
 		}
 
@@ -56,7 +57,7 @@ func buildPlugin(srcPath string) (string, error) {
 	if err != nil {
 		fmt.Println("build output ", errOut.String(), stdOut.String())
 	}
-	return "", err
+	return strings.TrimSuffix(srcPath, ".go")+".so", err
 }
 
 func loadPlugin(builtPath string) error {
