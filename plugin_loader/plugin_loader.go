@@ -15,11 +15,15 @@ import (
 	"strings"
 )
 
+var loadedPluginHashes *hashset.Set
+var plugins []*plugin.Plugin
+
 func ReloadPlugins(pluginFolder string) {
 	log.Println("loading plugins in plugin folder ", pluginFolder)
 	srcFiles := findAllSourceFiles(pluginFolder)
-	loadedPluginHashes := hashset.New()
-	var plugins []*plugin.Plugin
+	if loadedPluginHashes == nil {
+		loadedPluginHashes = hashset.New()
+	}
 	for _, filepath := range srcFiles {
 		log.Println("found ", filepath)
 		builtPath, err := buildPlugin(filepath)
@@ -40,6 +44,7 @@ func ReloadPlugins(pluginFolder string) {
 			plugins = append(plugins, pluginLoaded)
 			loadedPluginHashes.Add(hash)
 		}
+		log.Println("number of loaded plugins ", len(plugins), " hash cache size ", loadedPluginHashes.Size())
 	}
 }
 
@@ -99,8 +104,4 @@ func loadPlugin(builtPath string) (*plugin.Plugin, error) {
 		return nil, err
 	}
 	return p, nil
-}
-
-func pluginNeedsToBeLoaded(filepath string, alreadyLoadedPlugins hashset.Set) bool {
-	return true
 }
