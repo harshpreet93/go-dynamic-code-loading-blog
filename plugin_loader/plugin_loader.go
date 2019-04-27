@@ -18,7 +18,7 @@ import (
 var loadedPluginHashes *hashset.Set
 var plugins []*plugin.Plugin
 
-func ReloadPlugins(pluginFolder string) {
+func ReloadPlugins(pluginFolder string) []*plugin.Plugin {
 	log.Println("loading plugins in plugin folder ", pluginFolder)
 	srcFiles := findAllSourceFiles(pluginFolder)
 	if loadedPluginHashes == nil {
@@ -46,6 +46,7 @@ func ReloadPlugins(pluginFolder string) {
 		}
 		log.Println("number of loaded plugins ", len(plugins), " hash cache size ", loadedPluginHashes.Size())
 	}
+	return plugins
 }
 
 func getMD5(filepath string) (string, error) {

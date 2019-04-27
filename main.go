@@ -22,15 +22,24 @@ func main() {
 	fmt.Println("pluginrepo is " + *pluginrepo)
 
 	for range time.Tick(30 * time.Second) {
-		createWorkspace(*pluginrepo)
+		createWorkspaceAndTest(*pluginrepo)
 	}
 
 }
 
-func createWorkspace(repo string) {
+func createWorkspaceAndTest(repo string) {
 	//make sure
 	ensurePluginRepoFolderReadiness(repo)
-	plugin_loader.ReloadPlugins(plugin_source_folder_path+"/plugins")
+	loadedPlugins := plugin_loader.ReloadPlugins(plugin_source_folder_path+"/plugins")
+
+	// since we have the plugins......let's go further and actually use them to prove that they are....usable
+	for _, plugin := range loadedPlugins {
+		v, err := plugin.Lookup("Run")
+		if err != nil {
+			log.Println("error finding Run symbol in plugin")
+		}
+		v.(func())()
+	}
 
 }
 
