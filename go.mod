@@ -3,7 +3,7 @@ module github.com/harshpreet93/go-dynamic-code-loading-blog
 go 1.12
 
 require (
-	github.com/emirpasic/gods v1.12.0 // indirect
+	github.com/emirpasic/gods v1.12.0
 	github.com/gliderlabs/ssh v0.1.4 // indirect
 	github.com/kr/pty v1.1.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -19,3 +19,5 @@ require (
 	gopkg.in/src-d/go-git-fixtures.v3 v3.5.0 // indirect
 	gopkg.in/src-d/go-git.v4 v4.11.0
 )
+
+replace github.com/harshpreet93/go-dynamic-code-loading-blog/plugins => ./plugins

@@ -1,4 +1,6 @@
-package pluginC
+//go:generate go build -buildmode=plugin
+
+package main
 
 import "fmt"
 

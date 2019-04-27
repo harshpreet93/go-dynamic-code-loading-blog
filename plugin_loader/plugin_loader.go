@@ -1,9 +1,12 @@
 package plugin_loader
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/emirpasic/gods/sets/hashset"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -37,7 +40,23 @@ func findAllSourceFiles(pluginFolder string) []string {
 }
 
 func buildPlugin(srcPath string) (string, error) {
-	os.Exec
+	//go build -buildmode=plugin
+	cmd := exec.Command("go", "generate", srcPath)
+	wd, _ := os.Getwd()
+	fmt.Println("wd is ", wd)
+	var errOut bytes.Buffer
+	cmd.Stderr = &errOut
+	var stdOut bytes.Buffer
+	cmd.Stdout = &stdOut
+	err := cmd.Start()
+	if err != nil {
+		panic(err)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Println("build output ", errOut.String(), stdOut.String())
+	}
+	return "", err
 }
 
 func loadPlugin(builtPath string) error {
@@ -45,5 +64,5 @@ func loadPlugin(builtPath string) error {
 }
 
 func pluginNeedsToBeLoaded(filepath string, alreadyLoadedPlugins hashset.Set) bool {
-	return false
+	return true
 }
